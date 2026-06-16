@@ -3,6 +3,7 @@ import { Book, Article, Thought, UserSession } from '../types';
 import {
   BookOpen, Sparkles, FileText, Compass, Heart, Bookmark, Eye, Star, Quote, Tag, Shield, CreditCard
 } from 'lucide-react';
+import { t } from '../utils/translation';
 
 interface UnifiedCardProps {
   item: Book | Article | Thought;
@@ -14,6 +15,7 @@ interface UnifiedCardProps {
   onLike?: (itemId: string, itemType: string) => void;
   onAssignRating?: (itemId: string, itemType: string, score: number, title: string) => void;
   onPurchase?: (book: Book) => void;
+  currentLang?: string;
 }
 
 export default function UnifiedCard({
@@ -25,7 +27,8 @@ export default function UnifiedCard({
   onToggleFavorite,
   onLike,
   onAssignRating,
-  onPurchase
+  onPurchase,
+  currentLang = 'AR'
 }: UnifiedCardProps) {
   const [isFav, setIsFav] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
@@ -203,7 +206,7 @@ export default function UnifiedCard({
   const isABook = type === 'book';
   const bookItem = isABook ? (item as Book) : null;
   const isFreeCopy = isABook ? (bookItem?.isFree !== false) : true;
-  const priceText = isABook && bookItem?.price ? `${bookItem.price} درهم` : '٤٥ درهم';
+  const priceText = isABook && bookItem?.price ? `${bookItem.price} ${t('درهم', currentLang)}` : `٤٥ ${t('درهم', currentLang)}`;
   const isPurchased = isABook ? (localStorage.getItem(`purchased_book_${item.id}`) === 'true') : false;
 
   // Background configurations with 70% translucency
@@ -235,9 +238,9 @@ export default function UnifiedCard({
   }[type];
 
   const typeLabel = {
-    book: 'إصدار سحابي',
-    article: 'مقالة وعي',
-    thought: 'خاطرة إيمانية'
+    book: t('إصدار سحابي', currentLang),
+    article: t('مقالة وعي', currentLang),
+    thought: t('خاطرة إيمانية', currentLang)
   }[type];
 
   // Specific category icons
@@ -274,13 +277,13 @@ export default function UnifiedCard({
           <div className="flex justify-between items-center text-[10px] font-bold select-none">
             <span className="text-slate-800 dark:text-amber-250 flex items-center gap-1 bg-black/5 dark:bg-white/5 py-0.5 px-2.5 rounded-full border border-black/5 dark:border-white/5">
               {getCategoryIcon(item.category)}
-              <span>{item.category || typeLabel}</span>
+              <span>{t(item.category || typeLabel, currentLang)}</span>
             </span>
 
             {/* عداد القراءة عين وبجوارها رقم */}
             <span className="font-sans font-bold text-[10px] text-zinc-500 dark:text-amber-300/80 flex items-center gap-1 bg-black/5 dark:bg-white/5 py-0.5 px-2.5 rounded-full border border-black/5 dark:border-white/5">
               <Eye size={11} className="text-amber-500" />
-              <span>{localViews} قراءة</span>
+              <span>{localViews} {t('قراءة', currentLang)}</span>
             </span>
           </div>
 
@@ -295,7 +298,7 @@ export default function UnifiedCard({
           <div className="border-t border-slate-200/40 dark:border-white/5 pt-2 flex justify-between items-center select-none text-[10px]">
             <div>
               <h5 className="font-serif font-black text-amber-600 dark:text-amber-400">✦ {itemTitle}</h5>
-              <p className="text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">بقلم: {itemAuthor}</p>
+              <p className="text-[9px] text-slate-555 dark:text-slate-405 mt-0.5">{t('بقلم:', currentLang)} {itemAuthor}</p>
             </div>
 
             {/* Stars Rating and nothing else (التقييم في مكانه الأول بدون إضافات) */}
@@ -347,7 +350,7 @@ export default function UnifiedCard({
             onClick={onSelect}
             className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-slate-955 text-[9px] font-black rounded-lg transition-all"
           >
-            عرض الخاطرة
+            {t('عرض الخاطرة', currentLang)}
           </button>
         </div>
       </div>
@@ -382,12 +385,12 @@ export default function UnifiedCard({
           ) : (
             // Fallback Cover representation
             <div className="w-full h-full bg-gradient-to-br from-[#1E020B] to-[#3D0A1B] p-3.5 flex flex-col justify-between text-white relative">
-              <span className="text-[9px] bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10 self-start">{item.category}</span>
+              <span className="text-[9px] bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10 self-start">{t(item.category, currentLang)}</span>
               <div className="space-y-1">
                 <Quote size={15} className="text-amber-400/50" />
                 <h5 className="font-serif font-black text-xs leading-snug line-clamp-2">{itemTitle}</h5>
               </div>
-              <span className="text-[8px] font-mono text-slate-300 opacity-80">بقلم: {itemAuthor}</span>
+              <span className="text-[8px] font-mono text-slate-300 opacity-80">{t('بقلم:', currentLang)} {itemAuthor}</span>
             </div>
           )}
 
@@ -409,7 +412,7 @@ export default function UnifiedCard({
                   ? 'bg-emerald-600 text-white border-emerald-500'
                   : 'bg-rose-600 text-white border-rose-500'
               }`}>
-                {isFreeCopy ? 'مجاني' : priceText}
+                {isFreeCopy ? t('مجاني', currentLang) : priceText}
               </span>
             ) : (
               <span className="px-2 py-0.5 rounded-full shadow-md font-extrabold border block transform -rotate-12 bg-[#10b981]/80 text-white border-[#34d399]/30">
@@ -423,7 +426,7 @@ export default function UnifiedCard({
         <div className="flex items-center justify-between text-[10px] font-bold select-none pt-0.5">
           <span className="text-slate-800 dark:text-sky-205 flex items-center gap-1 bg-black/5 dark:bg-white/5 py-0.5 px-2 rounded-full border border-black/5 dark:border-white/5">
             {getCategoryIcon(item.category)}
-            <span>{item.category || typeLabel}</span>
+            <span>{t(item.category || typeLabel, currentLang)}</span>
           </span>
 
           {/* التقييم في مكانه الأول بدون إضافات أرقام */}
@@ -447,7 +450,7 @@ export default function UnifiedCard({
             🌸 {itemTitle}
           </h4>
           <p className="text-[9.5px] text-slate-555 dark:text-slate-400 font-sans">
-            بقلم: <span className="font-bold text-slate-705 dark:text-sky-200">{itemAuthor}</span>
+            {t('بقلم:', currentLang)} <span className="font-bold text-slate-705 dark:text-sky-200">{itemAuthor}</span>
           </p>
           
           {/* د. وتحت مختصر */}
@@ -497,7 +500,7 @@ export default function UnifiedCard({
                 onClick={onSelect}
                 className={`px-3.5 py-1.5 text-white font-black rounded-lg text-[9.5px] cursor-pointer transition-all flex items-center gap-1 shadow-sm hover:scale-105 ${styles.buttonBg}`}
               >
-                <span>عرض المزيد</span>
+                <span>{t('عرض المزيد', currentLang)}</span>
                 <span>←</span>
               </button>
             ) : (
@@ -505,7 +508,7 @@ export default function UnifiedCard({
                 onClick={onSelect}
                 className={`px-3.5 py-1.5 text-white font-black rounded-lg text-[9.5px] cursor-pointer transition-all flex items-center gap-1 shadow-sm hover:scale-105 ${styles.buttonBg}`}
               >
-                <span>{type === 'article' ? 'مطالعة المقال' : 'عرض'}</span>
+                <span>{type === 'article' ? t('مطالعة المقال', currentLang) : t('عرض', currentLang)}</span>
                 <span>←</span>
               </button>
             )}

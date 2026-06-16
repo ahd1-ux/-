@@ -1015,13 +1015,15 @@ interface DataTypeTranslations {
 export function t(key: string, lang: string): string {
   if (lang === 'AR' || !lang) return key;
   const translationSet = UI_TRANSLATIONS[key];
-  if (translationSet && translationSet[lang]) {
-    return translationSet[lang];
+  if (translationSet) {
+    if (translationSet[lang]) return translationSet[lang];
+    if (translationSet['EN']) return translationSet['EN'];
   }
   // Check text content dictionary as secondary
   const fallbackSet = TEXT_CONTENT_TRANSLATIONS[key];
-  if (fallbackSet && fallbackSet[lang]) {
-    return fallbackSet[lang];
+  if (fallbackSet) {
+    if (fallbackSet[lang]) return fallbackSet[lang];
+    if (fallbackSet['EN']) return fallbackSet['EN'];
   }
   return key;
 }
@@ -1030,16 +1032,18 @@ export function t(key: string, lang: string): string {
 export function translateBook(book: any, lang: string) {
   if (lang === 'AR' || !lang) return book;
   
-  const titleTr = TEXT_CONTENT_TRANSLATIONS[book.title]?.[lang] || book.title;
-  const authorTr = TEXT_CONTENT_TRANSLATIONS[book.author]?.[lang] || book.author;
-  const categoryTr = TEXT_CONTENT_TRANSLATIONS[book.category]?.[lang] || book.category;
-  const descriptionTr = TEXT_CONTENT_TRANSLATIONS[book.description]?.[lang] || book.description;
-  const editorTr = book.editor ? (TEXT_CONTENT_TRANSLATIONS[book.editor]?.[lang] || book.editor) : undefined;
+  const titleTr = TEXT_CONTENT_TRANSLATIONS[book.title]?.[lang] || TEXT_CONTENT_TRANSLATIONS[book.title]?.['EN'] || book.title;
+  const authorTr = TEXT_CONTENT_TRANSLATIONS[book.author]?.[lang] || TEXT_CONTENT_TRANSLATIONS[book.author]?.['EN'] || book.author;
+  const categoryTr = TEXT_CONTENT_TRANSLATIONS[book.category]?.[lang] || TEXT_CONTENT_TRANSLATIONS[book.category]?.['EN'] || book.category;
+  const descriptionTr = TEXT_CONTENT_TRANSLATIONS[book.description]?.[lang] || TEXT_CONTENT_TRANSLATIONS[book.description]?.['EN'] || book.description;
+  const editorTr = book.editor ? (TEXT_CONTENT_TRANSLATIONS[book.editor]?.[lang] || TEXT_CONTENT_TRANSLATIONS[book.editor]?.['EN'] || book.editor) : undefined;
   
   // Custom pages translation block check to preserve full integrity (translate known paragraphs beautifully)
   let translatedPages = [...book.content];
+  const targetLang = ['FR', 'TR', 'FA', 'DE', 'ES', 'UR', 'ZH', 'RU'].includes(lang) ? lang : 'EN';
+  
   if (book.id === 'b-wasitiyyah') {
-    if (lang === 'EN') {
+    if (targetLang === 'EN') {
       translatedPages = [
         `Introduction of editing - by editor Abu Hatim Al-Dir'i:
 Praise be to Allah alone, and peace and blessings be upon the Messenger of Allah, his family and companions, and whoever follows his guidance until the Day of Resurrection.
@@ -1052,7 +1056,7 @@ Part of belief in Allah is believing in how He described Himself in His Book, wi
     } else {
       translatedPages = book.content.map((p: string) => `[${lang}] ` + p.substring(0, 300) + "...");
     }
-  } else if (book.id === 'b-1' && lang === 'EN') {
+  } else if (book.id === 'b-1' && targetLang === 'EN') {
     translatedPages = [
       `Chapter One: Majesty of the Distant Horizon
 Standing below the wide heavens installs a deep feeling of marvel, elevating our understanding of nature. Clouds drift like peaceful messages telling stories about flexibility and flow. They don't block the mountain peaks but smoothly bend around them.`,
@@ -1061,7 +1065,7 @@ Clouds offer us ultimate advice regarding letting go and renewing. A cloud never
       `Chapter Three: Gazing Upwards as Mental Relief
 Often humans look down at their devices and earthly issues. Try to lay on green grass for five minutes, looking into blue sky. Your massive issues will suddenly look like tiny dust motes in infinite space.`
     ];
-  } else if (book.id === 'b-2' && lang === 'EN') {
+  } else if (book.id === 'b-2' && targetLang === 'EN') {
     translatedPages = [
       `Intro: From Darkness to Enlightenment
 Light is not external, but a seed lying inside you hidden by daily workloads and stress. To embark on the journey, reduce unnecessary excess baggage: old grudges, regrets, and expectations.`,
@@ -1070,7 +1074,7 @@ We survive in constant noise. Conscious silence means keeping twenty minutes dai
       `Step Two: Daily Gratitude practice
 Every single morning before touching your phone, declare three things you are grateful for. Gratitude changes your inner brain chemistry.`
     ];
-  } else if (book.id === 'b-3' && lang === 'EN') {
+  } else if (book.id === 'b-3' && targetLang === 'EN') {
     translatedPages = [
       `Section One: House of Wisdom in Baghdad
 In the gold age of Baghdad, the House of Wisdom was built as an international beacon of translations and sciences, where multiple languages gathered into eloquent Arabic text.`,
@@ -1095,24 +1099,26 @@ As papers decay under history's wheel, digital technology opens boundless gatewa
 export function translateArticle(article: any, lang: string) {
   if (lang === 'AR' || !lang) return article;
 
-  const titleTr = TEXT_CONTENT_TRANSLATIONS[article.title]?.[lang] || article.title;
-  const authorTr = TEXT_CONTENT_TRANSLATIONS[article.author]?.[lang] || article.author;
-  const categoryTr = TEXT_CONTENT_TRANSLATIONS[article.category]?.[lang] || article.category;
+  const titleTr = TEXT_CONTENT_TRANSLATIONS[article.title]?.[lang] || TEXT_CONTENT_TRANSLATIONS[article.title]?.['EN'] || article.title;
+  const authorTr = TEXT_CONTENT_TRANSLATIONS[article.author]?.[lang] || TEXT_CONTENT_TRANSLATIONS[article.author]?.['EN'] || article.author;
+  const categoryTr = TEXT_CONTENT_TRANSLATIONS[article.category]?.[lang] || TEXT_CONTENT_TRANSLATIONS[article.category]?.['EN'] || article.category;
   
   let translatedContent = [...article.content];
-  if (article.id === 'a-1' && lang === 'EN') {
+  const targetLang = ['FR', 'TR', 'FA', 'DE', 'ES', 'UR', 'ZH', 'RU'].includes(lang) ? lang : 'EN';
+  
+  if (article.id === 'a-1' && targetLang === 'EN') {
     translatedContent = [
       "We lives in a historical era where human brains receive a giant amount of notifications and short videos, reducing our core capabilities to focus and construct deep meditations.",
       "Quiet reading of e-books free from notifications is a beautiful active training for neural circuits to tolerate silence and improve working memory and analytical skills.",
       "To recover your peace of mind, commit twenty minutes daily before sleep with completely closed social apps, to read an elegant philosophical page. The results are pure balance."
     ];
-  } else if (article.id === 'a-2' && lang === 'EN') {
+  } else if (article.id === 'a-2' && targetLang === 'EN') {
     translatedContent = [
       "Since ancient times, clouds, rain, and meadows held a giant portion of Arabic poems and classical metaphors that are impossible to forget.",
       "The peace of nature and cloud movements is not a visuals luxury, but a dialogue between human souls and the universe that renews hope of rain and blossom.",
       "Our contemporary pens need to return to pure nature resources, instead of confining ourselves to concrete walls and modern monitors."
     ];
-  } else if (article.id === 'a-3' && lang === 'EN') {
+  } else if (article.id === 'a-3' && targetLang === 'EN') {
     translatedContent = [
       "A thought (Khaterah) is a sudden flash of feelings, an emotional spike written freely without structural rules or scientific logical constraints.",
       "On the other hand, an article is an organized construct, requesting solid thesis introduction, body points, and clear logical argument to convince minds.",
@@ -1133,10 +1139,10 @@ export function translateThought(thought: any, lang: string) {
   if (lang === 'AR' || !lang) return thought;
 
   const translationSet = THOUGHTS_CONTENT_TRANSLATIONS[thought.id];
-  const titleTr = translationSet?.title?.[lang] || thought.title;
-  const authorTr = TEXT_CONTENT_TRANSLATIONS[thought.author]?.[lang] || thought.author;
-  const categoryTr = TEXT_CONTENT_TRANSLATIONS[thought.category]?.[lang] || thought.category;
-  const contentTr = translationSet?.content?.[lang] || thought.content;
+  const titleTr = translationSet?.title?.[lang] || translationSet?.title?.['EN'] || thought.title;
+  const authorTr = TEXT_CONTENT_TRANSLATIONS[thought.author]?.[lang] || TEXT_CONTENT_TRANSLATIONS[thought.author]?.['EN'] || thought.author;
+  const categoryTr = TEXT_CONTENT_TRANSLATIONS[thought.category]?.[lang] || TEXT_CONTENT_TRANSLATIONS[thought.category]?.['EN'] || thought.category;
+  const contentTr = translationSet?.content?.[lang] || translationSet?.content?.['EN'] || thought.content;
 
   return {
     ...thought,

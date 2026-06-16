@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { User, ShieldAlert, Compass, Eye, EyeOff, BookOpen, Sparkles, AlertCircle } from 'lucide-react';
 import { UserSession } from '../types';
 import { ambientSound } from '../utils/ambientAudio';
+import siteLogo from '../assets/images/site_logo_1781429602478.jpg';
 
 interface SkyIntroProps {
   onSelectSession: (session: UserSession) => void;
@@ -464,7 +465,7 @@ export default function SkyIntro({ onSelectSession }: SkyIntroProps) {
                 className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-lg shadow-blue-900/10 mb-6 border border-[#a8dadc]/60 overflow-hidden"
               >
                 <img
-                  src="/src/assets/images/site_logo_1781429602478.jpg"
+                  src={siteLogo}
                   alt="Logo"
                   className="w-full h-full object-contain"
                   referrerPolicy="no-referrer"

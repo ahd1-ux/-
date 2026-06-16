@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 
 import { t, LANGUAGES, translateBook, translateArticle, translateThought } from './utils/translation';
+import siteLogo from './assets/images/site_logo_1781429602478.jpg';
 
 function formatPHPUrl(inputUrl: string): string {
   if (!inputUrl) return "";
@@ -91,7 +92,21 @@ export default function App() {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showProfile, setShowProfile] = useState(false); 
   const [showAllThoughtsModal, setShowAllThoughtsModal] = useState(false); 
-  const [currentLang, setCurrentLang] = useState<string>(() => localStorage.getItem('current_lang') || 'AR');
+  const [currentLang, setCurrentLang] = useState<string>(() => {
+    const saved = localStorage.getItem('current_lang');
+    if (saved) return saved;
+    try {
+      const browserLang = (navigator.language || (navigator as any).userLanguage || '').split('-')[0].toUpperCase();
+      const matched = LANGUAGES.find(l => l.code === browserLang);
+      if (matched) {
+        localStorage.setItem('current_lang', matched.code);
+        return matched.code;
+      }
+    } catch (e) {
+      console.warn('Failed to detect browser language:', e);
+    }
+    return 'AR';
+  });
   const [showLangDropdown, setShowLangDropdown] = useState(false); 
 
   // Theme settings (الوضع الفاتح السماوي بسحب متفرقة والداكن العنابي الفاخر)
@@ -170,6 +185,7 @@ export default function App() {
     const isRtl = currentLang === 'AR' || currentLang === 'FA' || currentLang === 'UR';
     document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
     document.documentElement.lang = currentLang.toLowerCase();
+    localStorage.setItem('current_lang', currentLang);
   }, [currentLang]);
 
   // Sync back from other components' storage edits dynamically
@@ -673,7 +689,7 @@ export default function App() {
           <div className="flex items-center gap-3 shrink-0 select-none">
             <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center bg-white border border-slate-200 dark:border-white/25 shadow-md">
               <img
-                src="/src/assets/images/site_logo_1781429602478.jpg"
+                src={siteLogo}
                 alt="Logo"
                 className="w-full h-full object-contain"
                 referrerPolicy="no-referrer"

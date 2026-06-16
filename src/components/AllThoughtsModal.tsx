@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Search, Sparkles, Heart, Copy, Check, Quote, Star, Compass, Eye, BookOpen } from 'lucide-react';
 import { Thought } from '../types';
 import { t, translateThought } from '../utils/translation';
+import siteLogo from '../assets/images/site_logo_1781429602478.jpg';
 
 // Assistive function for deterministic views
 function getViews(id: string): number {
@@ -152,7 +153,7 @@ export default function AllThoughtsModal({
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center bg-white border border-slate-200 dark:border-rose-900/30 shadow-md shrink-0">
               <img
-                src="/src/assets/images/site_logo_1781429602478.jpg"
+                src={siteLogo}
                 alt="Dar'ee Logo"
                 className="w-full h-full object-contain"
                 referrerPolicy="no-referrer"

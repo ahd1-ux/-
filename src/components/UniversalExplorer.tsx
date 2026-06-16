@@ -4,6 +4,7 @@ import { BookOpen, FileText, Star, Bookmark, Filter, X, CreditCard, ShieldCheck 
 import { Book, Article, UserSession } from '../types';
 import MarkdownEditor from './MarkdownEditor';
 import UnifiedCard from './UnifiedCard';
+import { t } from '../utils/translation';
 
 interface UniversalExplorerProps {
   books: Book[];
@@ -14,6 +15,7 @@ interface UniversalExplorerProps {
   onAddBook: (newBook: Book) => void;
   onAddArticle: (newArt: Article) => void;
   triggerToast: (msg: string) => void;
+  currentLang?: string;
 }
 
 export default function UniversalExplorer({
@@ -24,7 +26,8 @@ export default function UniversalExplorer({
   onSelectArticle,
   onAddBook,
   onAddArticle,
-  triggerToast
+  triggerToast,
+  currentLang = 'AR'
 }: UniversalExplorerProps) {
   // Filter and search states
   const [searchQuery, setSearchQuery] = useState('');
@@ -532,24 +535,24 @@ export default function UniversalExplorer({
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-white/5 pt-3.5">
                 <div>
-                  <label className="block text-[10px] text-slate-550 dark:text-rose-250 mb-1">تقدير مدة تصفح وجدولة المادة</label>
+                  <label className="block text-[10px] text-slate-550 dark:text-rose-250 mb-1">{t('تقدير مدة تصفح وجدولة المادة', currentLang)}</label>
                   <input
                     type="text"
                     value={addReadTime}
                     onChange={(e) => setAddReadTime(e.target.value)}
-                    placeholder="١٥ دقيقة قراءة"
-                    className="w-full p-2 bg-white/40 dark:bg-slate-900 border border-rose-950/20 text-xs rounded-xl text-slate-800 dark:text-white"
+                    placeholder={t('١٥ دقيقة قراءة', currentLang)}
+                    className="w-full p-2.5 bg-white/55 dark:bg-slate-955 border border-black/5 dark:border-rose-955 rounded-xl text-xs text-slate-800 dark:text-white"
                   />
                 </div>
 
                 {showAddForm === 'book' && (
                   <div>
-                    <label className="block text-[10px] text-slate-550 dark:text-rose-250 mb-1">رابط PDF حر من درايف للمطالعة (سحابي غني)</label>
+                    <label className="block text-[10px] text-slate-550 dark:text-rose-250 mb-1">{t('رابط PDF حر من درايف للمطالعة (سحابي غني)', currentLang)}</label>
                     <input
                       type="text"
-                      className="w-full p-2 bg-white/40 dark:bg-slate-900 border border-rose-950/20 text-xs rounded-xl text-slate-800 dark:text-white font-mono"
+                      className="w-full p-2.5 bg-white/55 dark:bg-slate-955 border border-black/5 dark:border-rose-955 rounded-xl text-xs text-slate-800 dark:text-white font-mono"
                       value={addPdfUrl}
                       onChange={(e) => setAddPdfUrl(e.target.value)}
                       placeholder="https://drive.google.com/..."
@@ -561,15 +564,15 @@ export default function UniversalExplorer({
               <div>
                 <label className="block text-xs font-black text-rose-950 dark:text-rose-200 mb-1.5 font-serif select-none flex items-center gap-1">
                   <span>🖋️</span>
-                  <span>{showAddForm === 'book' ? 'موجز ووصف أدبي عن فكرة ومحتويات المجلد' : 'متن وصيغة المقال بالتفصيل'}</span>
+                  <span>{showAddForm === 'book' ? t('موجز ووصف أدبي عن فكرة ومحتويات المجلد', currentLang) : t('متن وصيغة المقال بالتفصيل', currentLang)}</span>
                 </label>
                 <MarkdownEditor
                   value={addDescription}
                   onChange={setAddDescription}
                   placeholder={
                     showAddForm === 'book'
-                      ? 'موجز يسقي الفضول ويعرّف القراء بمحتوى هذا المجلد لتشجيعهم على التحميل والمطالعة الفورية...'
-                      : 'الكتابة بمداد من النور والوعي... ابدأ بصياغة مقالك الفكري المتميز هنا. يمكنك استخدام الأزرار الفاخرة بالأعلى لتنسيق العناوين، الاقتباسات، الأسطر العريضة، أو إدراج فواصل الفقرات.'
+                      ? t('موجز يسقي الفضول ويعرّف القراء بمحتوى هذا المجلد لتشجيعهم على التحميل والمطالعة الفورية...', currentLang)
+                      : t('الكتابة بمداد من النور والوعي... ابدأ بصياغة مقالك الفكري المتميز هنا. يمكنك استخدام الأزرار الفاخرة بالأعلى لتنسيق العناوين، الاقتباسات، الأسطر العريضة، أو إدراج فواصل الفقرات.', currentLang)
                   }
                 />
               </div>
@@ -580,13 +583,13 @@ export default function UniversalExplorer({
                   onClick={resetForm}
                   className="px-4 py-1.5 bg-black/10 dark:bg-rose-955/25 text-slate-700 dark:text-rose-250 rounded-lg cursor-pointer hover:bg-black/15"
                 >
-                  إلغاء الخروج
+                  {t('إلغاء الخروج', currentLang)}
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-black rounded-lg cursor-pointer shadow-md"
                 >
-                  حفظ في رفوف المكتبة ✦
+                  {t('حفظ في رفوف المكتبة ✦', currentLang)}
                 </button>
               </div>
             </form>
@@ -595,20 +598,20 @@ export default function UniversalExplorer({
       </AnimatePresence>
 
       {/* 2. Global Filtration Bar */}
-      <div className="bg-white/45 dark:bg-[#1C000B]/50 backdrop-blur-md rounded-3xl p-5 border border-white/30 dark:border-rose-950/30 shadow-md space-y-4">
+      <div className="bg-white/45 dark:bg-[#1C000B]/50 backdrop-blur-md rounded-3xl p-5 border border-white/30 dark:border-rose-955/30 shadow-md space-y-4">
         <div className="flex items-center justify-between border-b border-black/5 dark:border-white/10 pb-3">
           <div className="flex items-center gap-1.5 select-none">
             <Filter size={15} className="text-amber-500" />
-            <span className="text-xs font-black text-[#1C000B] dark:text-rose-100 font-serif">قسم الفرز والبلورة الآني للمواد والكتب</span>
+            <span className="text-xs font-black text-[#1C000B] dark:text-rose-100 font-serif">{t('قسم الفرز والبلورة الآني للمواد والكتب', currentLang)}</span>
           </div>
-          <span className="text-[10px] text-slate-550 dark:text-slate-400 font-mono font-bold">المجموع المقارن: {filteredAndSearchedItems.length} مصنف</span>
+          <span className="text-[10px] text-slate-550 dark:text-slate-400 font-mono font-bold">{t('المجموع المقارن:', currentLang)} {filteredAndSearchedItems.length} {t('مصنف', currentLang)}</span>
         </div>
 
         {/* Filters levels */}
         <div className="space-y-3 text-[10px] font-bold">
           {/* Level 1: Content Type */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-slate-500 text-[9px] w-14 shrink-0 select-none">نوع الرف:</span>
+            <span className="text-slate-500 text-[9px] w-14 shrink-0 select-none">{t('نوع الرف:', currentLang)}</span>
             <button
               onClick={() => setExplorerType('all')}
               className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
@@ -617,18 +620,18 @@ export default function UniversalExplorer({
                   : 'bg-white/40 dark:bg-[#3D0A1B]/40 border border-black/5 dark:border-rose-955/20 text-slate-700 dark:text-slate-355 hover:bg-white/50'
               }`}
             >
-              عرض الكل
+              {t('عرض الكل', currentLang)}
             </button>
             <button
               onClick={() => setExplorerType('books')}
               className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
                 explorerType === 'books'
-                  ? 'bg-sky-500/70 text-slate-900 dark:text-white border border-sky-300/40 shadow-sm backdrop-blur-sm'
+                  ? 'bg-sky-500/70 text-slate-900 dark:text-white border border-sky-305/40 shadow-sm backdrop-blur-sm'
                   : 'bg-white/40 dark:bg-[#3D0A1B]/40 border border-black/5 dark:border-rose-955/20 text-slate-705 dark:text-slate-355 hover:bg-white/50'
               }`}
             >
               <BookOpen size={10} />
-              <span>عرض الكتب</span>
+              <span>{t('عرض الكتب', currentLang)}</span>
             </button>
             <button
               onClick={() => setExplorerType('articles')}
@@ -639,22 +642,22 @@ export default function UniversalExplorer({
               }`}
             >
               <FileText size={10} />
-              <span>عرض المقالات</span>
+              <span>{t('عرض المقالات', currentLang)}</span>
             </button>
           </div>
 
           {/* Level 2: Categories Row */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-slate-500 text-[9px] w-14 shrink-0 select-none">أقسام ومواطن:</span>
+            <span className="text-slate-500 text-[9px] w-14 shrink-0 select-none">{t('أقسام ومواطن:', currentLang)}</span>
             <button
               onClick={() => setExplorerCategory('all')}
               className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
                 explorerCategory === 'all'
-                  ? 'bg-amber-400 text-slate-950 border border-amber-300 shadow-sm'
+                  ? 'bg-amber-400 text-slate-950 border border-amber-305 shadow-sm'
                   : 'bg-white/40 dark:bg-[#3D0A1B] border border-transparent dark:border-rose-955/20 text-slate-700 dark:text-slate-350 hover:bg-white/35'
               }`}
             >
-              كل الأقسام الفرعية
+              {t('كل الأقسام الفرعية', currentLang)}
             </button>
             {availableCategories.map(cat => (
               <button
@@ -666,14 +669,14 @@ export default function UniversalExplorer({
                     : 'bg-white/40 dark:bg-[#3D0A1B] border border-transparent dark:border-rose-955/20 text-slate-700 dark:text-slate-355 hover:bg-white/35'
                 }`}
               >
-                {cat}
+                {t(cat, currentLang)}
               </button>
             ))}
           </div>
 
           {/* Level 3: Extra Tags/Kinds */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-slate-500 text-[9px] w-14 shrink-0 select-none">معايير مخصصة:</span>
+            <span className="text-slate-500 text-[9px] w-14 shrink-0 select-none">{t('معايير مخصصة:', currentLang)}</span>
             <button
               onClick={() => setExplorerTag('all')}
               className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
@@ -682,7 +685,7 @@ export default function UniversalExplorer({
                   : 'bg-white/40 dark:bg-[#3D0A1B] border border-transparent dark:border-rose-955/20 text-slate-700 dark:text-slate-350 hover:bg-white/35'
               }`}
             >
-              كل المحتويات
+              {t('كل المحتويات', currentLang)}
             </button>
             <button
               onClick={() => setExplorerTag('saved')}
@@ -692,7 +695,7 @@ export default function UniversalExplorer({
                   : 'bg-white/40 dark:bg-[#3D0A1B] border border-transparent dark:border-rose-955/20 text-slate-705 dark:text-[#E2F1FF] hover:bg-white/35'
               }`}
             >
-              <span>المحفوظات الشخصية والمفضلة 🤍</span>
+              <span>{t('المحفوظات الشخصية والمفضلة 🤍', currentLang)}</span>
             </button>
             <button
               onClick={() => setExplorerTag('pdf')}
@@ -702,16 +705,17 @@ export default function UniversalExplorer({
                   : 'bg-white/40 dark:bg-[#3D0A1B] border border-transparent dark:border-rose-955/20 text-slate-700 dark:text-[#E2F1FF] hover:bg-white/35'
               }`}
             >
-              <span>مرفق بملف PDF مباشر للتحميل 📥</span>
+              <span>{t('مرفق بملف PDF مباشر للتحميل 📥', currentLang)}</span>
             </button>
           </div>
         </div>
       </div>
 
+
       {/* 3. Re-orchestrated GRID of UnifiedCards supporting identical designs and size constraints */}
       <h3 className="text-slate-800 dark:text-rose-100 font-serif text-sm font-black flex items-center gap-2 mt-4 select-none">
         <BookOpen className="text-amber-500 shrink-0 animate-bounce" size={16} />
-        <span>المعروضات ومصنفات الرفوف المتناسقة</span>
+        <span>{t('المعروضات ومصنفات الرفوف المتناسقة', currentLang)}</span>
       </h3>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pt-1">
@@ -726,6 +730,7 @@ export default function UniversalExplorer({
                 item={item.originalItem}
                 type={item.type === 'book' ? 'book' : 'article'}
                 session={session}
+                currentLang={currentLang}
                 onSelect={() => {
                   if (item.type === 'book') {
                     onSelectBook(item.originalItem);

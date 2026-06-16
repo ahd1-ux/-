@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Quote, Heart, Copy, Check, ChevronLeft, ChevronRight, FileText, Sparkles, Star, Eye, BookOpen } from 'lucide-react';
 import { Thought, Article, UserSession } from '../types';
+import { t } from '../utils/translation';
 
 interface ThoughtsCarouselProps {
   thoughts: Thought[];
@@ -13,6 +14,7 @@ interface ThoughtsCarouselProps {
   copiedId: string | null;
   triggerToast: (msg: string) => void;
   onViewAllThoughts: () => void;
+  currentLang?: string;
 }
 
 export default function ThoughtsCarousel({
@@ -24,7 +26,8 @@ export default function ThoughtsCarousel({
   onCopyThought,
   copiedId,
   triggerToast,
-  onViewAllThoughts
+  onViewAllThoughts,
+  currentLang = 'AR'
 }: ThoughtsCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -146,15 +149,15 @@ export default function ThoughtsCarousel({
             <div className="space-y-4">
               <div className="relative w-full h-[150px] rounded-tr-[32px] rounded-bl-[32px] rounded-tl-[12px] rounded-br-[12px] overflow-hidden shadow-inner border border-amber-250/20 dark:border-amber-955/20 bg-slate-950/10 flex flex-col items-center justify-center bg-gradient-to-br from-[#fef3c7]/50 to-[#fde68a]/50 dark:from-[#3a2f0f] dark:to-[#221a08] p-4 text-center">
                 <Sparkles size={38} className="text-amber-500 animate-bounce mb-1.5" />
-                <h5 className="font-serif font-black text-xs md:text-sm text-yellow-850 dark:text-amber-300 leading-normal">نبض الكلمة وسحر الأطروحات الفكرية</h5>
+                <h5 className="font-serif font-black text-xs md:text-sm text-yellow-850 dark:text-amber-300 leading-normal">{t('نبض الكلمة وسحر الأطروحات الفكرية', currentLang)}</h5>
                 <p className="text-[11px] text-yellow-950 dark:text-amber-200 mt-2 leading-relaxed font-bold">
-                  لقراءة المزيد من الخواطر المميزة يمكنك عرض المزيد بالنقر على زر الاستعراض في الأسفل 🌸
+                  {t('لقراءة المزيد من الخواطر المميزة يمكنك عرض المزيد بالنقر على زر الاستعراض في الأسفل 🌸', currentLang)}
                 </p>
               </div>
 
               <div className="text-center py-2 space-y-1">
-                <p className="text-xs font-serif font-bold text-slate-700 dark:text-amber-100">رواق الحكمة الوجدانية والتدبر</p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400">انضم إلينا في جولة أدبية كاملة لمداد النور والفهم العذب.</p>
+                <p className="text-xs font-serif font-bold text-slate-700 dark:text-amber-100">{t('رواق الحكمة الوجدانية والتدبر', currentLang)}</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">{t('انضم إلينا في جولة أدبية كاملة لمداد النور والفهم العذب.', currentLang)}</p>
               </div>
             </div>
 
@@ -165,7 +168,7 @@ export default function ThoughtsCarousel({
                   onClick={onViewAllThoughts}
                   className="px-3.5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-lg text-[10px] cursor-pointer transition-all flex items-center justify-center gap-1 shadow-md hover:scale-105"
                 >
-                  <span>قراءة المزيد</span>
+                  <span>{t('قراءة المزيد', currentLang)}</span>
                   <span>←</span>
                 </button>
 
@@ -215,14 +218,14 @@ export default function ThoughtsCarousel({
                 {/* Badge Overlay */}
                 <div className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 select-none font-black text-[10px]">
                   <span className="px-3.5 py-1.5 rounded-full bg-amber-500 text-slate-950 border border-amber-400 flex items-center gap-1.5 font-bold shadow-md">
-                    <span>💭</span> <span>أطروحة فكرية</span>
+                    <span>💭</span> <span>{t('أطروحة فكرية', currentLang)}</span>
                   </span>
                 </div>
               </div>
 
               {/* Rating and category */}
               <div className="flex items-center justify-between text-[11px] font-bold">
-                <span className="text-slate-800 dark:text-sky-200">القسم: {activeThought.category}</span>
+                <span className="text-slate-800 dark:text-sky-200">{t('القسم:', currentLang)} {t(activeThought.category, currentLang)}</span>
                 <div className="flex items-center gap-1 select-none" title="اضغط لتقييم الأطروحة">
                   <span className="text-[11px] text-slate-555 dark:text-sky-305 font-mono font-bold">
                     ({ratings[`thought_${activeThought.id}`] || activeThought.rating || 5}.0)
@@ -233,8 +236,8 @@ export default function ThoughtsCarousel({
                       return (
                         <button
                           key={star}
-                          onClick={() => assignRating(activeThought.id, 'thought', star, activeThought.title || 'خاطرة')}
-                          className="text-amber-500 hover:scale-120 transition-transform cursor-pointer border-none bg-transparent p-0"
+                          onClick={() => assignRating(activeThought.id, 'thought', star, activeThought.title || 'أطروحة')}
+                          className="text-amber-500 hover:scale-120 transition-transform cursor-pointer"
                         >
                           <Star size={11} fill={curRating >= star ? '#f59e0b' : 'none'} className="text-[#f59e0b] stroke-[#f59e0b]" />
                         </button>
@@ -249,25 +252,25 @@ export default function ThoughtsCarousel({
                 <h4
                   className="text-sm md:text-base font-black font-serif text-slate-900 dark:text-white leading-snug line-clamp-1"
                 >
-                  🌸 {activeThought.title || 'أطروحة وجدانية حرة'}
+                  🌸 {activeThought.title || t('أطروحة وجدانية حرة', currentLang)}
                 </h4>
                 <p className="text-[11px] text-slate-555 dark:text-slate-400">
-                  بقلم المبدع: <span className="font-bold text-slate-705 dark:text-sky-200">{activeThought.author}</span> • خواطر السكينة
+                  {t('بقلم المبدع:', currentLang)} <span className="font-bold text-slate-705 dark:text-sky-200">{activeThought.author}</span> • {t('خواطر السكينة', currentLang)}
                 </p>
 
                 {/* شريط إحصائيات الأطروحة الفكرية العميقة */}
                 <div className="mt-2.5 pt-2 border-t border-yellow-250/20 dark:border-rose-900/30 flex flex-wrap gap-2 items-center text-[9px] select-none">
-                  <span className="flex items-center gap-1 font-sans font-bold bg-sky-500/10 text-[#00b4d8] dark:text-sky-300 px-1.5 py-0.5 rounded-full border border-sky-400/10">
+                  <span className="flex items-center gap-1 font-sans font-bold bg-sky-500/10 text-[#00b4d8] dark:text-sky-305 px-1.5 py-0.5 rounded-full border border-sky-400/10">
                     <Eye size={9} />
-                    <span>{Math.abs(activeThought.id.split('').reduce((acc, cChar) => acc + cChar.charCodeAt(0), 0) % 220) + 40} قراءة</span>
+                    <span>{Math.abs(activeThought.id.split('').reduce((acc, cChar) => acc + cChar.charCodeAt(0), 0) % 220) + 40} {t('قراءة', currentLang)}</span>
                   </span>
                   <span className="flex items-center gap-1 font-sans font-bold bg-rose-500/10 text-rose-600 dark:text-rose-300 px-1.5 py-0.5 rounded-full border border-rose-400/10">
                     <Heart size={9} />
-                    <span>{activeThought.likes} تفاعل</span>
+                    <span>{activeThought.likes} {t('تفاعل', currentLang)}</span>
                   </span>
                   <span className="flex items-center gap-1 font-sans font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-400/10">
                     <Star size={9} className="fill-current text-amber-500" />
-                    <span>{ratings[`thought_${activeThought.id}`] || activeThought.rating || 5}.0 التقييم</span>
+                    <span>{ratings[`thought_${activeThought.id}`] || activeThought.rating || 5}.0 {t('التقييم', currentLang)}</span>
                   </span>
                 </div>
               </div>
@@ -341,7 +344,7 @@ export default function ThoughtsCarousel({
             </div>
           </div>
         ) : (
-          <div className="text-center p-6 text-slate-400 font-bold text-xs">لا توجد أطروحات فكرية متوفرة بمحط الرواق الفكري</div>
+          <div className="text-center p-6 text-slate-400 font-bold text-xs">{t('لا توجد أطروحات فكرية متوفرة بمحط الرواق الفكري', currentLang)}</div>
         )}
       </div>
 
@@ -368,16 +371,16 @@ export default function ThoughtsCarousel({
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-[#1E020B] to-[#3D0A1B] p-4 flex flex-col justify-between text-white">
-                      <span className="text-[10px] bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/10 text-emerald-300 self-start">{art.category}</span>
+                      <span className="text-[10px] bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/10 text-emerald-300 self-start">{t(art.category, currentLang)}</span>
                       <h5 className="font-serif font-black text-xs leading-snug line-clamp-3">{art.title}</h5>
-                      <span className="text-[10px] font-mono text-rose-300/85">دراسة بقلم: {art.author}</span>
+                      <span className="text-[10px] font-mono text-rose-300/85">{t('دراسة بقلم:', currentLang)} {art.author}</span>
                     </div>
                   )}
 
                   {/* Category overlay tags */}
                   <div className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 select-none font-black text-[10px]">
                     <span className="px-3.5 py-1.5 rounded-full bg-[#10b981] text-white border border-[#34d399]/40 flex items-center gap-1.5 font-bold shadow-md">
-                      <span>✍️</span> <span>مقالة وعي</span>
+                      <span>✍️</span> <span>{t('مقالة وعي', currentLang)}</span>
                     </span>
                   </div>
                 </div>
@@ -410,7 +413,7 @@ export default function ThoughtsCarousel({
                     🌸 {art.title}
                   </h4>
                   <p className="text-[11px] text-slate-555 dark:text-slate-400">
-                    بقلم المبدع: <span className="font-bold text-slate-705 dark:text-sky-200">{art.author}</span> • {art.readTime}
+                    {t('بقلم المبدع:', currentLang)} <span className="font-bold text-slate-705 dark:text-sky-200">{art.author}</span> • {art.readTime}
                   </p>
                   <p className="text-xs text-slate-700 dark:text-sky-100/90 leading-relaxed font-sans line-clamp-2 mt-2">
                     {art.description}
@@ -420,15 +423,15 @@ export default function ThoughtsCarousel({
                   <div className="mt-2.5 pt-2 border-t border-emerald-250/20 dark:border-emerald-900/30 flex flex-wrap gap-2 items-center text-[9px] select-none">
                     <span className="flex items-center gap-1 font-sans font-bold bg-sky-500/10 text-[#00b4d8] dark:text-sky-300 px-1.5 py-0.5 rounded-full border border-sky-400/10">
                       <Eye size={9} />
-                      <span>{art.views || Math.abs(art.id.split('').reduce((acc, c)=>acc+c.charCodeAt(0), 0) % 400) + 120} قراءة</span>
+                      <span>{art.views || Math.abs(art.id.split('').reduce((acc, c)=>acc+c.charCodeAt(0), 0) % 400) + 120} {t('قراءة', currentLang)}</span>
                     </span>
                     <span className="flex items-center gap-1 font-sans font-bold bg-rose-500/10 text-rose-600 dark:text-rose-300 px-1.5 py-0.5 rounded-full border border-rose-400/10">
                       <Heart size={9} />
-                      <span>{art.likes || 18} تفاعل</span>
+                      <span>{art.likes || 18} {t('تفاعل', currentLang)}</span>
                     </span>
                     <span className="flex items-center gap-1 font-sans font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-400/10">
                       <Star size={9} className="fill-current text-amber-500" />
-                      <span>{curRating}.0 التقييم</span>
+                      <span>{curRating}.0 {t('التقييم', currentLang)}</span>
                     </span>
                   </div>
                 </div>
@@ -456,7 +459,7 @@ export default function ThoughtsCarousel({
                     onClick={() => onSelectArticle(art)}
                     className="px-5 py-2.5 bg-[#00b4d8] hover:bg-[#0096c7] text-[#001D24] font-black rounded-full text-xs cursor-pointer transition-all flex items-center gap-1.5 shadow-md hover:scale-105"
                   >
-                    <span>مطالعة الصفحة</span>
+                    <span>{t('مطالعة الصفحة', currentLang)}</span>
                     <span>←</span>
                   </button>
                 </div>
