@@ -703,6 +703,7 @@ try {
             break;
     }
 } catch (Exception $e) {
+    if (ob_get_length()) ob_clean();
     http_response_code(500);
     echo json_encode([
         'success' => false,

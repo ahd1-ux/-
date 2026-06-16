@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { User, ShieldAlert, Compass, Eye, EyeOff, BookOpen, Sparkles, AlertCircle } from 'lucide-react';
 import { UserSession } from '../types';
 import { ambientSound } from '../utils/ambientAudio';
+import { smartFetch } from '../utils/api';
 import siteLogo from '../assets/images/site_logo_1781429602478.jpg';
 
 interface SkyIntroProps {
@@ -59,7 +60,7 @@ export default function SkyIntro({ onSelectSession }: SkyIntroProps) {
   const customAudioObj = React.useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    fetch('/api/welcome-audio')
+    smartFetch('/api/welcome-audio')
       .then(res => res.json())
       .then(data => {
         if (data && data.audio) {

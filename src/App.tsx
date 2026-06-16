@@ -24,52 +24,7 @@ import {
 
 import { t, LANGUAGES, translateBook, translateArticle, translateThought } from './utils/translation';
 import siteLogo from './assets/images/site_logo_1781429602478.jpg';
-
-function formatPHPUrl(inputUrl: string): string {
-  if (!inputUrl) return "";
-  let formatted = inputUrl.trim();
-  if (!formatted.toLowerCase().includes(".php")) {
-    if (!formatted.endsWith("/")) {
-      formatted += "/";
-    }
-    formatted += "api.php";
-  }
-  return formatted;
-}
-
-// Smart Client-side Fetch Router to bypass cloud connection restrictions for local databases like XAMPP
-export async function smartFetch(url: string, options?: RequestInit): Promise<Response> {
-  const rawPhpUrl = localStorage.getItem('custom_php_api_url') || localStorage.getItem('detected_php_api_url') || '';
-  const phpUrl = formatPHPUrl(rawPhpUrl);
-  const isLocalhost = phpUrl && (phpUrl.includes('localhost') || phpUrl.includes('127.0.0.1'));
-  
-  if (isLocalhost && url.startsWith('/api/')) {
-    const parts = url.split('/');
-    const endpoint = parts[2]; // 'books', 'articles', etc.
-    const id = parts[3]; // if exists
-    
-    try {
-      const targetUrl = new URL(phpUrl);
-      targetUrl.searchParams.set('action', endpoint);
-      if (id) {
-        targetUrl.searchParams.set('id', id);
-      }
-      
-      const phpOptions: RequestInit = {
-        ...options,
-        mode: 'cors',
-        credentials: 'omit'
-      };
-      
-      console.log(`[SmartFetch Local Direct Route] ${url} -> ${targetUrl.toString()}`);
-      return await fetch(targetUrl.toString(), phpOptions);
-    } catch (e) {
-      console.error('Failed to construct direct browser request to localhost PHP:', e);
-    }
-  }
-  
-  return fetch(url, options);
-}
+import { smartFetch } from './utils/api';
 
 export default function App() {
   // Session State
@@ -376,11 +331,19 @@ export default function App() {
           smartFetch('/api/users'),
         ]);
 
+        if (!booksRes.ok || !articlesRes.ok || !thoughtsRes.ok || !reviewsRes.ok || !usersRes.ok) {
+          throw new Error('أحد استدعاءات الخادم لم ينجح، استخدام الترس المحلي البديل');
+        }
+
         const dbBooks = await booksRes.json();
         const dbArticles = await articlesRes.json();
         const dbThoughts = await thoughtsRes.json();
         const dbReviews = await reviewsRes.json();
         const dbUsers = await usersRes.json();
+
+        if (!Array.isArray(dbBooks) || !Array.isArray(dbArticles) || !Array.isArray(dbThoughts) || !Array.isArray(dbReviews)) {
+          throw new Error('البيانات المستلمة من الخادم ليست مصفوفات صحيحة');
+        }
 
         // Prevent recursive triggers by calling the original storage setter directly
         originalSetItem.call(localStorage, 'library_books', JSON.stringify(dbBooks));

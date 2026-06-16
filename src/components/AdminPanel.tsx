@@ -52,9 +52,7 @@ interface AdminPanelProps {
 
 type AdminTab = 'analytics' | 'book' | 'article' | 'thought' | 'users' | 'manager';
 
-async function smartFetch(url: string, options?: RequestInit): Promise<Response> {
-  return fetch(url, options);
-}
+import { smartFetch, getAutoDetectedPhpUrl, formatPHPUrl } from '../utils/api';
 
 export default function AdminPanel({
   books,
@@ -125,7 +123,7 @@ export default function AdminPanel({
 
   // Load welcome audio filename on mount
   useEffect(() => {
-    fetch('/api/welcome-audio')
+    smartFetch('/api/welcome-audio')
       .then(r => r.json())
       .then(data => {
         if (data && data.filename) {
@@ -156,7 +154,7 @@ export default function AdminPanel({
     reader.onload = async () => {
       const base64Audio = reader.result as string;
       try {
-        const response = await fetch('/api/welcome-audio', {
+        const response = await smartFetch('/api/welcome-audio', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -166,7 +164,14 @@ export default function AdminPanel({
             filename: file.name
           })
         });
-        const resData = await response.json();
+        
+        let resData: any;
+        try {
+          resData = await response.json();
+        } catch (jErr) {
+          throw new Error('لم يرجع السيرفر استجابة JSON صالحة. يرجى التحقق من وجود ملف api.php وزرعه في مجلد htdocs.');
+        }
+
         if (resData.success) {
           setWelcomeAudioFilename(file.name);
           setNotif('🎵 تم رفع وحفظ ملف الصوت الترحيبي الخاص بك بنجاح!');
@@ -185,10 +190,17 @@ export default function AdminPanel({
 
   const handleAudioDelete = async () => {
     try {
-      const response = await fetch('/api/welcome-audio', {
+      const response = await smartFetch('/api/welcome-audio', {
         method: 'DELETE'
       });
-      const resData = await response.json();
+      
+      let resData: any;
+      try {
+        resData = await response.json();
+      } catch (jErr) {
+        throw new Error('لم يرجع السيرفر استجابة JSON صالحة عند الحذف.');
+      }
+
       if (resData.success) {
         setWelcomeAudioFilename(null);
         setNotif('🗑️ تم حذف ملف الصوت الترحيبي بنجاح، وسيعود النظام للأصوات الطبيعية الافتراضية!');
@@ -211,6 +223,21 @@ export default function AdminPanel({
 
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
+  const [customPhpUrl, setCustomPhpUrl] = useState(() => localStorage.getItem('custom_php_api_url') || '');
+
+  const handleSaveCustomPhpUrl = async (url: string) => {
+    const trimmed = url.trim();
+    if (trimmed) {
+      localStorage.setItem('custom_php_api_url', trimmed);
+    } else {
+      localStorage.removeItem('custom_php_api_url');
+    }
+    setCustomPhpUrl(trimmed);
+    // Trigger direct state check immediately
+    setTimeout(() => {
+      fetchDbStatus();
+    }, 50);
+  };
 
   const fetchDbStatus = async () => {
     try {
@@ -274,7 +301,13 @@ export default function AdminPanel({
         body: JSON.stringify(body)
       });
 
-      const responseData = await res.json();
+      let responseData: any;
+      try {
+        responseData = await res.json();
+      } catch (parseErr) {
+        throw new Error(`استجابة غير صالحة من السيرفر (كود ${res.status}). يرجى التأكد من تشغيل Apache و MySQL في XAMPP، ووجود ملف api.php في مجلد htdocs الخاص بك.`);
+      }
+
       if (!res.ok || responseData.success === false) {
         throw new Error(responseData.error || 'فشلت عملية المزامنة');
       }
@@ -370,11 +403,23 @@ export default function AdminPanel({
       const coms = localStorage.getItem('library_reviews') || '[]';
       const favs = localStorage.getItem('library_favorites') || '[]';
       const rats = localStorage.getItem('library_ratings') || '[]';
-      setLocalComments(JSON.parse(coms));
-      setLocalFavorites(JSON.parse(favs));
-      setLocalRatings(JSON.parse(rats));
+      
+      let parsedComs = JSON.parse(coms);
+      let parsedFavs = JSON.parse(favs);
+      let parsedRats = JSON.parse(rats);
+
+      if (!Array.isArray(parsedComs)) parsedComs = [];
+      if (!Array.isArray(parsedFavs)) parsedFavs = [];
+      if (!Array.isArray(parsedRats)) parsedRats = [];
+
+      setLocalComments(parsedComs);
+      setLocalFavorites(parsedFavs);
+      setLocalRatings(parsedRats);
     } catch (e) {
-      console.error(e);
+      console.error('Error loading interactive logged databases: ', e);
+      setLocalComments([]);
+      setLocalFavorites([]);
+      setLocalRatings([]);
     }
   };
 
@@ -420,7 +465,22 @@ export default function AdminPanel({
   const loadUsers = () => {
     const list = localStorage.getItem('library_users');
     if (list) {
-      setRegisteredUsers(JSON.parse(list));
+      try {
+        const parsed = JSON.parse(list);
+        if (Array.isArray(parsed)) {
+          setRegisteredUsers(parsed);
+        } else if (typeof parsed === 'object' && parsed !== null) {
+          const usersArray = Object.values(parsed) as RegisteredUser[];
+          setRegisteredUsers(usersArray);
+        } else {
+          setRegisteredUsers([]);
+        }
+      } catch (err) {
+        console.error('Error parsing library_users', err);
+        setRegisteredUsers([]);
+      }
+    } else {
+      setRegisteredUsers([]);
     }
   };
 
@@ -653,7 +713,15 @@ export default function AdminPanel({
       return u;
     });
 
-    localStorage.setItem('library_users', JSON.stringify(updatedUsers));
+    // Save as dictionary/object back to localStorage to match login & PHP sync expectations
+    const usersObj: Record<string, RegisteredUser> = {};
+    updatedUsers.forEach(u => {
+      if (u.username) {
+        usersObj[u.username.toLowerCase().trim()] = u;
+      }
+    });
+
+    localStorage.setItem('library_users', JSON.stringify(usersObj));
     setRegisteredUsers(updatedUsers);
     setEditingUser(null);
     setNewPasswordVal('');
@@ -663,7 +731,16 @@ export default function AdminPanel({
   const handleDeleteUser = (username: string) => {
     if (confirm('هل أنت متأكد من حذف هذا العضو القارئ نهائياً؟')) {
       let updated = registeredUsers.filter(u => u.username !== username);
-      localStorage.setItem('library_users', JSON.stringify(updated));
+
+      // Save as dictionary/object back to localStorage
+      const usersObj: Record<string, RegisteredUser> = {};
+      updated.forEach(u => {
+        if (u.username) {
+          usersObj[u.username.toLowerCase().trim()] = u;
+        }
+      });
+
+      localStorage.setItem('library_users', JSON.stringify(usersObj));
       setRegisteredUsers(updated);
       showNotification('🔥 تم شطب العضو نهائياً من سجلات الموقع');
     }
@@ -818,7 +895,47 @@ export default function AdminPanel({
                 </div>
 
                 {/* حقل ربط قاعدة بيانات مخصص (Local XAMPP Bypass) */}
+                <div className="bg-slate-950 p-4 rounded-xl border border-dashed border-slate-800 space-y-3">
+                  <span className="text-[10px] text-amber-400 block font-bold">🛠️ إعدادات ربط رابط الـ API الخاص بـ PHP (XAMPP / Remote):</span>
+                  
+                  <div className="space-y-1.5 font-sans">
+                    <label className="text-[10px] text-slate-300 block">
+                      رابط الـ API النشط لـ PHP على جهازك (يمكنك تعديله يدوياً):
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        dir="ltr"
+                        value={customPhpUrl}
+                        onChange={(e) => setCustomPhpUrl(e.target.value)}
+                        placeholder={getAutoDetectedPhpUrl() || "http://localhost/dar-ee/api.php"}
+                        className="flex-1 bg-slate-900 border border-slate-800 text-slate-100 rounded-lg px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-amber-400 font-sans"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleSaveCustomPhpUrl(customPhpUrl)}
+                        className="px-3 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-lg text-xs transition-all cursor-pointer font-sans"
+                      >
+                        حفظ واختبار
+                      </button>
+                    </div>
+                  </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px] text-slate-400 font-sans leading-relaxed">
+                    <div>
+                      <span className="text-white font-bold block">💡 الرابط المكتشف تلقائياً:</span>
+                      <code className="text-amber-400/90 font-mono block select-all break-all bg-slate-900 px-1.5 py-0.5 rounded mt-1">
+                        {getAutoDetectedPhpUrl() || "لا يمكن كشفه خارج السيرفر المحلي"}
+                      </code>
+                    </div>
+                    <div>
+                      <span className="text-white font-bold block">📌 نصيحة مهمة لـ XAMPP:</span>
+                      <span>
+                        إذا قمت برفع ملفاتك إلى مجلد مثل <code className="text-slate-300 font-mono">htdocs/books/</code> فإن الرابط المناسب لك هو <code className="text-slate-300 font-mono">http://localhost/books/api.php</code>.
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-2">
@@ -826,39 +943,43 @@ export default function AdminPanel({
                     {dbStatus.loading ? (
                       <div className="text-xs text-slate-400 flex items-center gap-1.5">
                         <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                        <span>جاري قراءة تكوين السيرفر الخارجي...</span>
+                        <span>جاري قراءة تكوين السيرفر الخارجي والتحقق من الاستجابة...</span>
                       </div>
-                    ) : dbStatus.status === 'connected' ? (
+                    ) : dbStatus.status === 'ready' || dbStatus.status === 'connected' ? (
                       <div className="space-y-1.5">
                         <div className="text-xs text-emerald-400 flex items-center gap-1.5 font-bold">
                           <Wifi size={14} />
-                          <span>متصل بنجاح بقاعدة البيانات MySQL الخارجية!</span>
+                          <span>متصل بنجاح بقاعدة البيانات MySQL الخارجية ومستعد تماماً!</span>
                         </div>
                         <p className="text-[10px] text-slate-300 leading-relaxed font-sans">
-                          جميع العمليات وقراءة/كتابة الكتب والمقالات تم ربطها بنجاح مع خادم الـ PHP الخاص بك (<span className="text-amber-400 font-mono">MySQL-PDO</span>). أي بيانات جديدة يتم حفظها وحمايتها في سيرفرك الخاص فوراً!
+                          جميع العمليات وقراءة/كتابة الكتب والمقالات تم ربطها بنجاح مع خادم الـ PHP الخاص بك (<span className="text-amber-400 font-mono">MySQL-PDO</span>). أي تغييرات تضيفها هنا ستُحفظ في سيرفرك المحلي فوراً!
+                        </p>
+                      </div>
+                    ) : dbStatus.status === 'tables_missing_please_import_sql' ? (
+                      <div className="space-y-1.5">
+                        <div className="text-xs text-blue-400 flex items-center gap-1.5 font-bold">
+                          <Wifi size={14} />
+                          <span>السيرفر متصل لكن الجداول فارغة (مستعد لصب البيانات)</span>
+                        </div>
+                        <p className="text-[10px] text-slate-300 leading-relaxed font-sans">
+                          تم الاتصال بـ PHP و MySQL بنجاح لكن لم يتم العثور على الجداول. يرجى الضغط على <span className="text-amber-400 font-bold">"ضخ ومزامنة كافة المحتوى الآن"</span> بالجانب لتهيئة الجداول وملئها بالبيانات فوراً تلقائياً!
                         </p>
                       </div>
                     ) : (
                       <div className="space-y-1.5">
-                        <div className="text-xs text-amber-400 flex items-center gap-1.5 font-bold">
+                        <div className="text-xs text-red-400 flex items-center gap-1.5 font-bold">
                           <WifiOff size={14} />
-                          <span>قاعدة البيانات جارية محلياً (JSON Fallback)</span>
+                          <span>قاعدة البيانات جارية محلياً بالوضع الاحتياطي (فشل الاتصال بـ api.php)</span>
                         </div>
                         <p className="text-[10px] text-slate-400 leading-relaxed font-sans">
-                          أنت تعمل على ملفات الحاوية المحلية المؤقتة للموقع. لربط سيرفر الـ MySQL الخارجي الخاص بك بشكل مباشر:
-                          <br />
-                          1. اذهب وتوجه إلى <span className="text-white font-bold">إعدادات الموقع المطور في AI Studio (Settings)</span>.
-                          <br />
-                          2. أنشئ وأضف متغير بيئة جديد باسم: <code className="bg-slate-900 border border-slate-800 px-1 rounded text-amber-400 font-mono">PHP_API_URL</code>.
-                          <br />
-                          3. ضع قيمة الرابط كاملاً الذي رفعت عليه ملف الـ API مثل: <code className="bg-slate-900 border border-slate-800 px-1 rounded text-slate-300 font-mono">https://domain.com/api.php</code>.
+                          تأكد من تشغيل Apache و MySQL في XAMPP، ومن صحة رابط الـ API المدخل أعلاه.
                         </p>
                       </div>
                     )}
 
                     {dbStatus.error && (
-                      <div className="mt-2 p-2 bg-red-950/40 border border-red-500/20 rounded-xl text-[10px] text-red-400 font-sans leading-relaxed">
-                        <span className="font-bold block mb-0.5">خطأ السيرفر الخارجي:</span>
+                      <div className="mt-2 p-2 bg-red-950/40 border border-red-500/20 rounded-xl text-[10px] text-red-400 font-sans leading-relaxed break-all">
+                        <span className="font-bold block mb-0.5">تفاصيل خطأ السيرفر:</span>
                         {dbStatus.error}
                       </div>
                     )}
