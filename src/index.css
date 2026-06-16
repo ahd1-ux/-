@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Tajawal", "Inter", sans-serif;
+  --font-serif: "Amiri", "Georgia", serif;
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+  .text-shadow-md {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  }
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Twinkling stars and drifting cloud styles */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.15;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35) rotate(15deg);
+    filter: drop-shadow(0 0 4px #fbbf24) drop-shadow(0 0 8px #f59e0b);
+  }
+}
+
+.animate-twinkle {
+  animation: twinkle var(--duration, 3s) ease-in-out infinite;
+}
+
+/* Custom scrollbars for client containers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(27, 38, 44, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(15, 76, 117, 0.3);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 76, 117, 0.6);
+}
+
+/* Premium Custom Styles to Override Google Translate Widget UI */
+#google_translate_element {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.goog-te-gadget {
+  font-family: "Tajawal", sans-serif !important;
+  color: transparent !important;
+  font-size: 0 !important;
+}
+
+.goog-te-gadget-simple {
+  background-color: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-family: "Tajawal", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: inherit !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  gap: 2px !important;
+}
+
+/* Hide Google Logo & Icon assets */
+.goog-te-gadget-icon, 
+.goog-te-gadget-simple img,
+.goog-te-menu-value img {
+  display: none !important;
+}
+
+.goog-te-menu-value {
+  color: inherit !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  font-family: inherit !important;
+}
+
+.goog-te-menu-value span {
+  border-left: none !important;
+  font-family: inherit !important;
+}
+
+/* Make Google Translate dropdown dialog beautiful */
+.goog-te-menu-frame {
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.35) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background-color: #17050a !important;
+  z-index: 9999999 !important;
+}
+
+/* Ensure no page top bars push layout */
+body {
+  top: 0 !important;
+}
+.skiptranslate {
+  display: none !important;
+}
+iframe.goog-te-banner-frame {
+  display: none !important;
+}
+
